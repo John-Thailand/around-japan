@@ -73,7 +73,7 @@ class MainPage extends StatelessWidget {
                 width: (MediaQuery.of(context).size.width - 100),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text(
-                  'サインイン',
+                  'ログイン',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 30,

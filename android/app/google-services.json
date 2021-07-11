@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "348955667908",
+    "project_id": "around-japan",
+    "storage_bucket": "around-japan.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:348955667908:android:95fa6db5f190cec6674891",
+        "android_client_info": {
+          "package_name": "com.example.around_country"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "348955667908-nen2mg2mqt3m8m9ldppkca0nurvh4gpp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhizMRVptPOjJwSwt7XsmNsh9Q81JGqRY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "348955667908-nen2mg2mqt3m8m9ldppkca0nurvh4gpp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "348955667908-oo28p4n2ns0hil5jooo7fdu4oanc5v6g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.aroundCountry"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
