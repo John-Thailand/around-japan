@@ -14,6 +14,10 @@ class SignUpModel extends ChangeNotifier {
     // メールアドレスのバリデーション
     if (mail.isEmpty) {
       throw ('メールアドレスを入力してください');
+    } else if (!RegExp(
+            r'^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$')
+        .hasMatch(mail)) {
+      throw ('メールアドレスが不正です');
     }
 
     // パスワードのバリデーション

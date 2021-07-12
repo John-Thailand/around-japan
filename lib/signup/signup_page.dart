@@ -27,7 +27,7 @@ class SignUpPage extends StatelessWidget {
                 children: <Widget>[
                   Container(
                     margin: const EdgeInsets.only(top: 35),
-                    child: TextField(
+                    child: TextFormField(
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'メールアドレス',
