@@ -1,3 +1,4 @@
+import 'package:around_country/signup/signup_page.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatelessWidget {
@@ -56,7 +57,7 @@ class MainPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MainPage(),
+                    builder: (context) => SignUpPage(),
                   ),
                 );
               },
