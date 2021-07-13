@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 
 class MenuPage extends StatelessWidget {
   @override
@@ -16,38 +17,71 @@ class MapSample extends StatefulWidget {
 
 class MapSampleState extends State<MapSample> {
   Completer<GoogleMapController> _controller = Completer();
+  Location _locationService = Location();
 
-  static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(35.68134947200318, 139.76724281456794),
-    zoom: 14.4746,
-  );
+  // 現在位置
+  LocationData? _yourLocation;
 
-  static final CameraPosition _kLake = CameraPosition(
-      bearing: 192.8334901395799,
-      target: LatLng(37.43296265331129, -122.08832357078792),
-      tilt: 59.440717697143555,
-      zoom: 19.151926040649414);
+  // 現在位置の監視状況
+  StreamSubscription? _locationChangedListen;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 現在位置の取得
+    _getLocation();
+
+    // 現在位置の変化を監視
+    _locationChangedListen =
+        _locationService.onLocationChanged.listen((LocationData result) async {
+      setState(() {
+        _yourLocation = result;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    // 監視を終了
+    _locationChangedListen?.cancel();
+  }
+
+  void _getLocation() async {
+    _yourLocation = await _locationService.getLocation();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      body: GoogleMap(
-        mapType: MapType.hybrid,
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _goToTheLake,
-        label: Text('To the lake!'),
-        icon: Icon(Icons.directions_boat),
-      ),
+    return Scaffold(
+      body: _makeGoogleMap(),
     );
   }
 
-  Future<void> _goToTheLake() async {
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
+  Widget _makeGoogleMap() {
+    if (_yourLocation == null) {
+      // 現在位置が取れるまではローディング中
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      // Google Map ウィジェットを返す
+      return GoogleMap(
+        // 初期表示される位置情報を現在位置から設定
+        initialCameraPosition: CameraPosition(
+          target: LatLng(_yourLocation!.latitude as double,
+              _yourLocation!.longitude as double),
+          zoom: 18.0,
+        ),
+        onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+        },
+
+        // 現在位置にアイコン（青い円形のやつ）を置く
+        myLocationEnabled: true,
+      );
+    }
   }
 }
