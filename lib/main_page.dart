@@ -1,6 +1,8 @@
 import 'package:around_country/signup/signup_page.dart';
 import 'package:flutter/material.dart';
 
+import 'login/login_page.dart';
+
 class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -87,7 +89,7 @@ class MainPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MainPage(),
+                    builder: (context) => LoginPage(),
                   ),
                 );
               },

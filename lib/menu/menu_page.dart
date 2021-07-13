@@ -1,25 +1,25 @@
-import 'package:around_country/signup/signup_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'menu_model.dart';
 
-class SignUpPage extends StatelessWidget {
+class MenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mailController = TextEditingController();
     final passwordController = TextEditingController();
 
-    return ChangeNotifierProvider<SignUpModel>(
-      create: (_) => SignUpModel(),
+    return ChangeNotifierProvider<MenuModel>(
+      create: (_) => MenuModel(),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blue.withOpacity(0.7),
-          title: Text('新規登録',
+          title: Text('メニュー',
               style: TextStyle(
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
               )),
         ),
-        body: Consumer<SignUpModel>(
+        body: Consumer<MenuModel>(
           builder: (context, model, child) {
             return Padding(
               padding: const EdgeInsets.all(8.0),
@@ -58,11 +58,11 @@ class SignUpPage extends StatelessWidget {
                   ),
                   Container(
                     margin: const EdgeInsets.only(top: 45),
-                    width: 150,
+                    width: 190,
                     child: RaisedButton(
                       padding: const EdgeInsets.all(5),
                       child: Text(
-                        '登録する',
+                        'ログインする',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 24,
@@ -70,8 +70,8 @@ class SignUpPage extends StatelessWidget {
                       ),
                       onPressed: () async {
                         try {
-                          await model.signUp();
-                          _showDialog(context, '登録完了しました');
+                          await model.Menu();
+                          _showDialog(context, 'ログインしました');
                         } catch (e) {
                           _showDialog(context, e.toString());
                         }
@@ -99,9 +99,13 @@ Future _showDialog(BuildContext context, String title) async {
             child: const Text('OK'),
             onPressed: () {
               Navigator.of(context).pop();
-              if (title == '登録完了しました') {
-                // トップページへ戻る
-                Navigator.of(context).pop();
+              if (title == 'ログインしました') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MenuPage(),
+                  ),
+                );
               }
             },
           ),

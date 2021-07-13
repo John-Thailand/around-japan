@@ -1,12 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class SignUpModel extends ChangeNotifier {
+class LoginModel extends ChangeNotifier {
   String mail = '';
   String password = '';
 
-  Future signUp() async {
+  Future Login() async {
     // 大文字と小文字が含まれているかを判定するための変数
     String upPassword = password.toUpperCase();
     String lowPassword = password.toLowerCase();
@@ -32,20 +31,14 @@ class SignUpModel extends ChangeNotifier {
     }
 
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: mail, password: password);
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: mail, password: password);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        throw ('６文字以上入力してください');
-      } else if (e.code == 'email-already-in-use') {
-        throw ('そのメールアドレスはすでに登録されています');
+      if (e.code == 'user-not-found') {
+        throw ('ユーザーが見つかりません');
+      } else if (e.code == 'wrong-password') {
+        throw ('パスワードが間違っています');
       }
-    } catch (e) {
-      throw (e);
     }
-    FirebaseFirestore.instance.collection('users').add({
-      'email': mail,
-      'createdAt': Timestamp.now(),
-    });
   }
 }
