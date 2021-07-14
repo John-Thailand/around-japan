@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
+import 'footer.dart';
+
 class MenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -57,6 +59,7 @@ class MapSampleState extends State<MapSample> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _makeGoogleMap(),
+      bottomNavigationBar: Footer(),
     );
   }
 
