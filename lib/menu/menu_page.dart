@@ -27,6 +27,9 @@ class MapSampleState extends State<MapSample> {
   // 現在位置の監視状況
   StreamSubscription? _locationChangedListen;
 
+  // ズームの量
+  double zoom = 18;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +62,37 @@ class MapSampleState extends State<MapSample> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _makeGoogleMap(),
+      floatingActionButton: Column(
+        verticalDirection: VerticalDirection.up, // childrenの先頭が下に配置されます。
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          // 1つ目のFAB
+          FloatingActionButton.extended(
+            heroTag: "goal",
+            icon: Icon(Icons.pin_drop_outlined),
+            label: Text('ゴール　'),
+            backgroundColor: Colors.blue[200],
+            onPressed: () async {
+              // （省略）タップされた際の処理
+            },
+          ),
+          // 2つ目のFAB
+          Container(
+            // 余白を設けるためContainerでラップします。
+            margin: EdgeInsets.only(bottom: 16.0),
+            child: FloatingActionButton.extended(
+              // ユニークな名称をつけましょう。ないとエラーになります。
+              heroTag: "start",
+              icon: Icon(Icons.pin_drop_outlined),
+              label: Text('スタート'),
+              backgroundColor: Colors.pink[200],
+              onPressed: () async {
+                // （省略）タップされた際の処理
+              },
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: Footer(),
     );
   }
@@ -76,8 +110,9 @@ class MapSampleState extends State<MapSample> {
         initialCameraPosition: CameraPosition(
           target: LatLng(_yourLocation!.latitude as double,
               _yourLocation!.longitude as double),
-          zoom: 18.0,
+          zoom: zoom,
         ),
+
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },

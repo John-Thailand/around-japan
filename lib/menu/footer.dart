@@ -8,12 +8,14 @@ class Footer extends StatefulWidget {
 }
 
 class _Footer extends State<Footer> {
+  // 選択されたボタンの番号
   int _selectedIndex = 0;
+  // ボトムナビゲーションのアイテム配列
   final _bottomNavigationBarItems = <BottomNavigationBarItem>[];
 
   // アイコン情報
   static const _footerIcons = [
-    Icons.home,
+    Icons.map_rounded,
     Icons.textsms,
     Icons.access_time,
     Icons.content_paste,
@@ -22,7 +24,7 @@ class _Footer extends State<Footer> {
 
   // アイコン文字列
   static const _footerItemNames = [
-    'ホーム',
+    '地図',
     'トーク',
     'タイムライン',
     'ニュース',
@@ -75,6 +77,18 @@ class _Footer extends State<Footer> {
       _bottomNavigationBarItems[index] = _UpdateActiveState(index);
       _selectedIndex = index;
     });
+    switch (index) {
+      case 0:
+        break;
+      case 1:
+        break;
+      case 2:
+        break;
+      case 3:
+        break;
+      default:
+        break;
+    }
   }
 
   @override
