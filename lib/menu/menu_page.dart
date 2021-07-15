@@ -97,6 +97,18 @@ class MapSampleState extends State<MapSample> {
     );
   }
 
+  static final LatLng _kMapCenter1 = LatLng(37.785834, -122.406417);
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+
+  Set<Marker> _createMarker() {
+    return {
+      Marker(
+        markerId: MarkerId("marker_1"),
+        position: _kMapCenter1,
+      ),
+    };
+  }
+
   Widget _makeGoogleMap() {
     if (_yourLocation == null) {
       // 現在位置が取れるまではローディング中
@@ -106,17 +118,16 @@ class MapSampleState extends State<MapSample> {
     } else {
       // Google Map ウィジェットを返す
       return GoogleMap(
+        markers: _createMarker(),
         // 初期表示される位置情報を現在位置から設定
         initialCameraPosition: CameraPosition(
           target: LatLng(_yourLocation!.latitude as double,
               _yourLocation!.longitude as double),
           zoom: zoom,
         ),
-
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
-
         // 現在位置にアイコン（青い円形のやつ）を置く
         myLocationEnabled: true,
       );
