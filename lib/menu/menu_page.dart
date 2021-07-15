@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
 import 'footer.dart';
+import 'menu_model.dart';
 
 class MenuPage extends StatelessWidget {
   @override
@@ -18,6 +20,7 @@ class MapSample extends StatefulWidget {
 }
 
 class MapSampleState extends State<MapSample> {
+  // マップに関する設定
   Completer<GoogleMapController> _controller = Completer();
   Location _locationService = Location();
 
@@ -29,6 +32,9 @@ class MapSampleState extends State<MapSample> {
 
   // ズームの量
   double zoom = 18;
+
+  // メニューモデルのコントローラー
+  final MenuModel c = Get.put(MenuModel());
 
   @override
   void initState() {
@@ -87,7 +93,8 @@ class MapSampleState extends State<MapSample> {
               label: Text('スタート'),
               backgroundColor: Colors.pink[200],
               onPressed: () async {
-                // （省略）タップされた際の処理
+                // 現在地をスタート地点としてマーカーを置く
+                c.createStartMarker(_yourLocation);
               },
             ),
           ),
@@ -95,18 +102,6 @@ class MapSampleState extends State<MapSample> {
       ),
       bottomNavigationBar: Footer(),
     );
-  }
-
-  static final LatLng _kMapCenter1 = LatLng(37.785834, -122.406417);
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-
-  Set<Marker> _createMarker() {
-    return {
-      Marker(
-        markerId: MarkerId("marker_1"),
-        position: _kMapCenter1,
-      ),
-    };
   }
 
   Widget _makeGoogleMap() {
@@ -118,7 +113,7 @@ class MapSampleState extends State<MapSample> {
     } else {
       // Google Map ウィジェットを返す
       return GoogleMap(
-        markers: _createMarker(),
+        markers: c.markers,
         // 初期表示される位置情報を現在位置から設定
         initialCameraPosition: CameraPosition(
           target: LatLng(_yourLocation!.latitude as double,
