@@ -1,7 +1,7 @@
-import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class MenuModel extends GetxController {
+class MenuModel extends ChangeNotifier {
   Set<Marker> markers = {};
   int _markerId = 1;
 
@@ -13,6 +13,7 @@ class MenuModel extends GetxController {
             yourLocation!.longitude as double),
       ));
       _markerId++;
+      notifyListeners();
     }
   }
 }
