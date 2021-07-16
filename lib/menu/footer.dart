@@ -1,4 +1,7 @@
+import 'package:around_country/share/share_page.dart';
 import 'package:flutter/material.dart';
+
+import 'menu_page.dart';
 
 class Footer extends StatefulWidget {
   const Footer();
@@ -16,7 +19,7 @@ class _Footer extends State<Footer> {
   // アイコン情報
   static const _footerIcons = [
     Icons.map_rounded,
-    Icons.textsms,
+    Icons.share,
     Icons.access_time,
     Icons.content_paste,
     Icons.work,
@@ -25,7 +28,7 @@ class _Footer extends State<Footer> {
   // アイコン文字列
   static const _footerItemNames = [
     '地図',
-    'トーク',
+    '共有',
     'タイムライン',
     'ニュース',
     'ウォレット',
@@ -79,8 +82,15 @@ class _Footer extends State<Footer> {
     });
     switch (index) {
       case 0:
+        // Nothing
         break;
       case 1:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SharePage(),
+          ),
+        );
         break;
       case 2:
         break;

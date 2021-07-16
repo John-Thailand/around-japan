@@ -37,6 +37,7 @@ dependencies:
   geolocator: ^7.2.0+1
   location: ^4.3.0
   get: ^4.1.4
+  share: ^2.0.4
 
 dev_dependencies:
   flutter_test:
@@ -87,3 +88,4 @@ flutter:
   assets:
     - img/traveler.png
     - img/background-img.jpg
+    - img/background-share.png
