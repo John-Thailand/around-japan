@@ -1,7 +1,6 @@
+import 'package:around_country/settings/settings_page.dart';
 import 'package:around_country/share/share_page.dart';
 import 'package:flutter/material.dart';
-
-import 'menu_page.dart';
 
 class Footer extends StatefulWidget {
   const Footer();
@@ -20,18 +19,14 @@ class _Footer extends State<Footer> {
   static const _footerIcons = [
     Icons.map_rounded,
     Icons.share,
-    Icons.access_time,
-    Icons.content_paste,
-    Icons.work,
+    Icons.settings,
   ];
 
   // アイコン文字列
   static const _footerItemNames = [
     '地図',
     '共有',
-    'タイムライン',
-    'ニュース',
-    'ウォレット',
+    '設定',
   ];
 
   @override
@@ -93,8 +88,12 @@ class _Footer extends State<Footer> {
         );
         break;
       case 2:
-        break;
-      case 3:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SettingsPage(),
+          ),
+        );
         break;
       default:
         break;
