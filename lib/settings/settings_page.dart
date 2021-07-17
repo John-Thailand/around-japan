@@ -1,54 +1,35 @@
+import 'package:around_country/widget/icon_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:share/share.dart';
+import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue.withOpacity(0.7),
-        title: Text('共有',
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-            )),
-      ),
-      body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('img/background-share.png'),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Center(
-            child: RaisedButton(
-              color: Colors.white.withOpacity(0.75),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Container(
-                width: (MediaQuery.of(context).size.width - 100),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  '共有する',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              onPressed: () async {
-                // メッセージをSNSに共有する
-                await share();
-              },
-            ),
-          )),
-    );
-  }
+  _SettingsPageState createState() => _SettingsPageState();
 }
 
-Future share() async {
-  await Share.share(
-      'Please visit http://mukku-portfolio.conohawing.com/ishii-kadan/');
+class _SettingsPageState extends State<SettingsPage> {
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: SafeArea(
+          child: ListView(
+            padding: EdgeInsets.all(24),
+            children: [
+              SettingsGroup(
+                title: 'GENERAL',
+                children: <Widget>[
+                  buildLogout(),
+                  buildDeleteAccount(),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+  Widget buildLogout() => SimpleSettingsTile(
+        title: 'Logout',
+        subtitle: '',
+        leading: IconWidget(icon: Icons.logout, color: Colors.blue),
+        onTap: () => Utils.showSnackBar(context, "Clicked Logout"),
+      );
 }
