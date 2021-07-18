@@ -82,35 +82,31 @@ class MenuPageState extends State<MenuPage> {
     });
   }
 
-  // 設置する予定のマーカーの数
-  int markerNum = 1;
+  // マーカーの数
+  int markerNum = 0;
   // ダイアログのはい（1）・いいえ（0）の結果
   bool isAddStartMarker = false;
-  _onAddStartMarkerButtonPressed() {
+  // スタートを押した時の処理
+  void _onAddStartMarkerButtonPressed() {
+    String workTitle = '';
+    String workContent = '';
     setState(() {
-      if (markerNum == 1) {
-        isAddStartMarker = _showDialog(context, '確認', '現在地をスタート地点としますか？');
-        if (isAddStartMarker == true) {
-          _markers.add(
-            Marker(
-              markerId: MarkerId(_yourLocation.toString()),
-              position: LatLng(_yourLocation!.latitude as double,
-                  _yourLocation!.longitude as double),
-              infoWindow: InfoWindow(
-                title: 'スタート地点',
-                snippet: '日本一周を達成しましょう！',
-              ),
-              icon: BitmapDescriptor.defaultMarker,
-            ),
-          );
-          markerNum++;
-        }
-      }
+      if (markerNum == 0) {
+        workTitle = '確認';
+        workContent = '現在地をスタート地点としますか？';
+        // マーカーを追加するかをユーザに聞き、「はい」であればマーカーを追加する
+        _showDialog(context, workTitle, workContent, _addMarker);
+      } //else {
+      //workTitle = '確認';
+      //workContent = 'スタート地点は既に設定されています。¥nスタート地点を削除しますか？';
+      // マーカーを削除するかをユーザに聞き、「はい」であればマーカーを削除する
+      //_showDialog(context, workTitle, workContent, _deleteMarker);
+      //}
     });
   }
 
-  bool _showDialog(BuildContext context, String title, String content) {
-    bool result = false;
+  void _showDialog(
+      BuildContext context, String title, String content, Function function) {
     showDialog<void>(
       context: context,
       // 背景を押した時に、ダイアログは閉じない設定
@@ -123,8 +119,8 @@ class MenuPageState extends State<MenuPage> {
             FlatButton(
               child: Text('はい'),
               onPressed: () {
+                function('スタート地点', '本日の終了地点の設定をする場合は、「ゴール」ボタンを押してください。');
                 Navigator.of(context).pop(0);
-                result = true;
               },
             ),
             FlatButton(
@@ -137,8 +133,28 @@ class MenuPageState extends State<MenuPage> {
         );
       },
     );
-    return result;
   }
+
+  // マーカーを追加する処理
+  void _addMarker(String title, String snippet) {
+    setState(() {
+      _markers.add(
+        Marker(
+          markerId: MarkerId(_yourLocation.toString()),
+          position: LatLng(_yourLocation!.latitude as double,
+              _yourLocation!.longitude as double),
+          infoWindow: InfoWindow(
+            title: title,
+            snippet: snippet,
+          ),
+          icon: BitmapDescriptor.defaultMarker,
+        ),
+      );
+      markerNum++;
+    });
+  }
+
+  // マーカーを削除する処理
 
   Widget button(Function function, IconData icon, String label) {
     return FloatingActionButton.extended(
