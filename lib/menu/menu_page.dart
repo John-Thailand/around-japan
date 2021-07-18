@@ -96,12 +96,12 @@ class MenuPageState extends State<MenuPage> {
         workContent = '現在地をスタート地点としますか？';
         // マーカーを追加するかをユーザに聞き、「はい」であればマーカーを追加する
         _showDialog(context, workTitle, workContent, _addMarker);
-      } //else {
-      //workTitle = '確認';
-      //workContent = 'スタート地点は既に設定されています。¥nスタート地点を削除しますか？';
-      // マーカーを削除するかをユーザに聞き、「はい」であればマーカーを削除する
-      //_showDialog(context, workTitle, workContent, _deleteMarker);
-      //}
+      } else {
+        workTitle = '確認';
+        workContent = 'スタート地点は既に設定されています。\n日本一周の記録を全て削除しますか？';
+        // マーカーを削除するかをユーザに聞き、「はい」であればマーカーを削除する
+        _showDialog(context, workTitle, workContent, _deleteMarker);
+      }
     });
   }
 
@@ -119,8 +119,15 @@ class MenuPageState extends State<MenuPage> {
             FlatButton(
               child: Text('はい'),
               onPressed: () {
-                function('スタート地点', '本日の終了地点の設定をする場合は、「ゴール」ボタンを押してください。');
-                Navigator.of(context).pop(0);
+                if (function == _addMarker) {
+                  // マーカーを追加する
+                  function('スタート地点', '本日の終了地点の設定をする場合は、「ゴール」ボタンを押してください。');
+                  Navigator.of(context).pop(0);
+                } else {
+                  // マーカーを削除する
+                  function();
+                  Navigator.of(context).pop(0);
+                }
               },
             ),
             FlatButton(
@@ -155,6 +162,14 @@ class MenuPageState extends State<MenuPage> {
   }
 
   // マーカーを削除する処理
+  void _deleteMarker() {
+    setState(() {
+      // マーカーを全て削除する
+      _markers.clear();
+      // マーカーの数を初期化
+      markerNum = 0;
+    });
+  }
 
   Widget button(Function function, IconData icon, String label) {
     return FloatingActionButton.extended(
