@@ -98,13 +98,13 @@ class MenuPageState extends State<MenuPage> {
         workContent = '現在地をスタート地点としますか？';
         // マーカーを追加するかをユーザに聞き、「はい」であればマーカーを追加する
         _showDialog(context, workTitle, workContent, _addMarker,
-            _addUserInformationToFirestore);
+            _addUserPositionToFirestore);
       } else {
         workTitle = '確認';
         workContent = 'スタート地点は既に設定されています。\n日本一周の記録を全て削除しますか？';
         // マーカーを削除するかをユーザに聞き、「はい」であればマーカーを削除する
         _showDialog(context, workTitle, workContent, _deleteMarker,
-            _deleteUserInformationToFirestore);
+            _deleteUserPositionToFirestore);
       }
     });
   }
@@ -131,6 +131,8 @@ class MenuPageState extends State<MenuPage> {
                 } else {
                   // マーカーを削除する
                   function();
+                  // Firestoreのデータベースのユーザ位置情報を全て削除する
+                  dbfunction();
                 }
                 Navigator.of(context).pop(0);
               },
@@ -178,29 +180,36 @@ class MenuPageState extends State<MenuPage> {
 
   String documentId = '';
   // FireStoreにユーザ情報を追加する
-  Future _addUserInformationToFirestore() async {
+  Future _addUserPositionToFirestore() async {
     final collection = FirebaseFirestore.instance.collection('userPosition');
     await collection.add({
-      'email': await _getUserEmail(),
+      'email': _getUserEmail(),
       'geopoints': [
         GeoPoint(_yourLocation!.latitude as double,
             _yourLocation!.longitude as double)
       ],
-    }).then((value) => documentId = value.id);
-    collection.doc(documentId).update({
-      'documentId': documentId,
     });
   }
 
-  // FireStoreにユーザ情報を削除する
-  Future _deleteUserInformationToFirestore() async {
-    String email = _getUserEmail() as String;
+  // FireStoreにユーザ位置情報を削除する
+  Future _deleteUserPositionToFirestore() async {
+    String email = _getUserEmail();
     final collection = FirebaseFirestore.instance.collection('userPosition');
+    final snapshot = await collection.get();
+    final docs = snapshot.docs;
+    // それぞれのドキュメント
+    docs.forEach((doc) {
+      // アカウント設定した時のメールアドレスとドキュメント内のメールアドレスが一致している場合
+      if (doc['email'] == email) {
+        // そのドキュメントを削除する
+        collection.doc(doc.id).delete();
+      }
+    });
     // collection.where('email', isEqualTo: email).get();
   }
 
   // ユーザーのメールアドレスを取得する
-  Future _getUserEmail() async {
+  String _getUserEmail() {
     String userEmail = '';
     User? user = FirebaseAuth.instance.currentUser;
     userEmail = user!.email!;
