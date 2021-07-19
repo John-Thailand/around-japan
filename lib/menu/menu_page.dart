@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -95,18 +97,20 @@ class MenuPageState extends State<MenuPage> {
         workTitle = '確認';
         workContent = '現在地をスタート地点としますか？';
         // マーカーを追加するかをユーザに聞き、「はい」であればマーカーを追加する
-        _showDialog(context, workTitle, workContent, _addMarker);
+        _showDialog(context, workTitle, workContent, _addMarker,
+            _addUserInformationToFirestore);
       } else {
         workTitle = '確認';
         workContent = 'スタート地点は既に設定されています。\n日本一周の記録を全て削除しますか？';
         // マーカーを削除するかをユーザに聞き、「はい」であればマーカーを削除する
-        _showDialog(context, workTitle, workContent, _deleteMarker);
+        _showDialog(context, workTitle, workContent, _deleteMarker,
+            _deleteUserInformationToFirestore);
       }
     });
   }
 
-  void _showDialog(
-      BuildContext context, String title, String content, Function function) {
+  void _showDialog(BuildContext context, String title, String content,
+      Function function, Function dbfunction) {
     showDialog<void>(
       context: context,
       // 背景を押した時に、ダイアログは閉じない設定
@@ -122,12 +126,13 @@ class MenuPageState extends State<MenuPage> {
                 if (function == _addMarker) {
                   // マーカーを追加する
                   function('スタート地点', '本日の終了地点の設定をする場合は、「ゴール」ボタンを押してください。');
-                  Navigator.of(context).pop(0);
+                  // Firestoreのデータベースにユーザーのスタート位置情報を追加する
+                  dbfunction();
                 } else {
                   // マーカーを削除する
                   function();
-                  Navigator.of(context).pop(0);
                 }
+                Navigator.of(context).pop(0);
               },
             ),
             FlatButton(
@@ -169,6 +174,37 @@ class MenuPageState extends State<MenuPage> {
       // マーカーの数を初期化
       markerNum = 0;
     });
+  }
+
+  String documentId = '';
+  // FireStoreにユーザ情報を追加する
+  Future _addUserInformationToFirestore() async {
+    final collection = FirebaseFirestore.instance.collection('userPosition');
+    await collection.add({
+      'email': await _getUserEmail(),
+      'geopoints': [
+        GeoPoint(_yourLocation!.latitude as double,
+            _yourLocation!.longitude as double)
+      ],
+    }).then((value) => documentId = value.id);
+    collection.doc(documentId).update({
+      'documentId': documentId,
+    });
+  }
+
+  // FireStoreにユーザ情報を削除する
+  Future _deleteUserInformationToFirestore() async {
+    String email = _getUserEmail() as String;
+    final collection = FirebaseFirestore.instance.collection('userPosition');
+    // collection.where('email', isEqualTo: email).get();
+  }
+
+  // ユーザーのメールアドレスを取得する
+  Future _getUserEmail() async {
+    String userEmail = '';
+    User? user = FirebaseAuth.instance.currentUser;
+    userEmail = user!.email!;
+    return userEmail;
   }
 
   Widget button(Function function, IconData icon, String label) {
