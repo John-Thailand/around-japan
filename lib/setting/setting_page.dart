@@ -7,13 +7,17 @@ class SettingPage extends StatefulWidget {
 }
 
 class SettingPageState extends State<SettingPage> {
-  bool valNotify1 = true;
-  bool valNotify2 = true;
-  bool valNotify3 = true;
+  // ダークモードを設定するための変数
+  bool isDarkMode = false;
+  ThemeData _dark = ThemeData(brightness: Brightness.dark);
+  ThemeData _light = ThemeData(brightness: Brightness.light);
 
-  onChangeFunction1(bool newValue1) {
+  bool valNotify2 = false;
+  bool valNotify3 = false;
+
+  onChangeDarkMode(bool newIsDarkMode) {
     setState(() {
-      valNotify1 = newValue1;
+      isDarkMode = newIsDarkMode;
     });
   }
 
@@ -32,6 +36,7 @@ class SettingPageState extends State<SettingPage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: isDarkMode ? _dark : _light,
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blue.withOpacity(0.7),
@@ -62,7 +67,7 @@ class SettingPageState extends State<SettingPage> {
                     color: Colors.blue,
                   ),
                   SizedBox(width: 10),
-                  Text('Account',
+                  Text('アカウント',
                       style:
                           TextStyle(fontSize: 22, fontWeight: FontWeight.bold))
                 ],
@@ -79,7 +84,7 @@ class SettingPageState extends State<SettingPage> {
                 children: [
                   Icon(Icons.volume_up_outlined, color: Colors.blue),
                   SizedBox(width: 10),
-                  Text('Notifications',
+                  Text('詳細設定',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -88,8 +93,7 @@ class SettingPageState extends State<SettingPage> {
               ),
               Divider(height: 20, thickness: 1),
               SizedBox(height: 10),
-              buildNotificationOption(
-                  'Theme Dark', valNotify1, onChangeFunction1),
+              buildNotificationOption('ダークモード', isDarkMode, onChangeDarkMode),
               buildNotificationOption(
                   'Account Active', valNotify2, onChangeFunction2),
               buildNotificationOption(
@@ -109,7 +113,6 @@ class SettingPageState extends State<SettingPage> {
                     style: TextStyle(
                       fontSize: 16,
                       letterSpacing: 2.2,
-                      color: Colors.black,
                     ),
                   ),
                 ),
