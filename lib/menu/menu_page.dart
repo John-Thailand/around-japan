@@ -20,7 +20,7 @@ class MenuPageState extends State<MenuPage> {
   // 現在位置の監視状況
   StreamSubscription? _locationChangedListen;
   // マーカーの設定
-  final Set<Marker> _markers = {};
+  List<Marker> _markers = [];
   // Mapの表示設定
   MapType _currentMapType = MapType.normal;
 
@@ -67,7 +67,8 @@ class MenuPageState extends State<MenuPage> {
                 _yourLocation!.longitude as double),
             zoom: 18),
         mapType: _currentMapType,
-        markers: _markers,
+        // markers: _markers.map((e) => e).toSet(),
+        markers: Set.from(_markers),
       );
     }
   }
@@ -243,18 +244,17 @@ class MenuPageState extends State<MenuPage> {
   // マーカーを追加する処理
   void _addMarker(String title, String snippet) {
     setState(() {
-      _markers.add(
-        Marker(
-          markerId: MarkerId(_yourLocation.toString()),
-          position: LatLng(_yourLocation!.latitude as double,
-              _yourLocation!.longitude as double),
-          infoWindow: InfoWindow(
-            title: title,
-            snippet: snippet,
-          ),
-          icon: BitmapDescriptor.defaultMarker,
+      Marker marker = Marker(
+        markerId: MarkerId(_yourLocation.toString()),
+        position: LatLng(_yourLocation!.latitude as double,
+            _yourLocation!.longitude as double),
+        infoWindow: InfoWindow(
+          title: title,
+          snippet: snippet,
         ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       );
+      _markers.add(marker);
       markerNum++;
     });
   }
@@ -262,17 +262,16 @@ class MenuPageState extends State<MenuPage> {
   // マーカーを追加する処理
   void _addMarker1(String title, String snippet) {
     setState(() {
-      _markers.add(
-        Marker(
-          markerId: MarkerId(_yourLocation.toString()),
-          position: LatLng(37.78648424379196, -122.40495733028315),
-          infoWindow: InfoWindow(
-            title: title,
-            snippet: snippet,
-          ),
-          icon: BitmapDescriptor.defaultMarker,
+      Marker marker = Marker(
+        markerId: MarkerId(_yourLocation.toString()),
+        position: LatLng(37.78648424379196, -122.40495733028315),
+        infoWindow: InfoWindow(
+          title: title,
+          snippet: snippet,
         ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       );
+      _markers.add(marker);
       markerNum++;
     });
   }

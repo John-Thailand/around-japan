@@ -1,3 +1,4 @@
+import 'package:around_country/setting/setting_page.dart';
 import 'package:around_country/share/share_page.dart';
 import 'package:flutter/material.dart';
 
@@ -90,7 +91,7 @@ class _Footer extends State<Footer> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SharePage(),
+            builder: (context) => SettingPage(),
           ),
         );
         break;
