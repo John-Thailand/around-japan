@@ -135,7 +135,7 @@ class MenuPageState extends State<MenuPage> {
           },
         );
       } else {
-        _showSimpleDialog(context);
+        _showSimpleDialog();
         // showDialog 確認・markerNum日目の終了地点として設定しますか？ゴール地点として設定しますか？
         //                 1. markerNum日目の終了地点として設定
         //                    title: marker日目の終了地点 content: 最後まで諦めずに突き進みましょう！
@@ -156,43 +156,48 @@ class MenuPageState extends State<MenuPage> {
     });
   }
 
-  Future<void> _showSimpleDialog(BuildContext context) async {
-    String day = markerNum as String;
-    await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return SimpleDialog(
-            title: Text('$day日目の終了地点として設定しますか？\nゴール地点として設定しますか？'),
-            children: <Widget>[
-              SimpleDialogOption(
-                onPressed: () {
-                  // title: marker日目の終了地点 content: 最後まで諦めずに突き進みましょう！
-                  // 上記の情報を持ったマーカーを追加する
-                  _addMarker('$day日目の終了地点', '最後まで諦めずに突き進みましょう！');
-                  // データベースに位置情報を更新する
-                  _updateUserPositionToFirestore();
-                  Navigator.pop(context);
-                },
-                child: Text('$day日目の終了地点として設定'),
-              ),
-              SimpleDialogOption(
-                onPressed: () {
-                  // title: ゴール content: 最後までやりきったあなたは素晴らしいです！
-                  // 上記の情報を持ったマーカーを追加する
-                  Navigator.pop(context);
-                },
-                child: Text('ゴール地点として設定'),
-              ),
-              SimpleDialogOption(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('設定しない'),
-              ),
-            ],
-          );
-        });
+  Future<void> _showSimpleDialog() async {
+    String day = markerNum.toString();
+    switch (await showDialog(
+      context: context,
+      // barrierDismissible: false,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: Text('選択してください'),
+          children: [
+            SimpleDialogOption(
+              child: Text('$day日目の終了地点として設定'),
+              onPressed: () {
+                Navigator.pop(context, Place.HalfwayPoint);
+              },
+            ),
+            SimpleDialogOption(
+              child: Text('ゴール地点として設定'),
+              onPressed: () {
+                Navigator.pop(context, Place.GoalPoint);
+              },
+            ),
+            SimpleDialogOption(
+              child: Text('設定しない'),
+              onPressed: () {
+                Navigator.pop(context, Place.Nothing);
+              },
+            ),
+          ],
+        );
+      },
+    )) {
+      case Place.HalfwayPoint:
+        _addMarker1('$day日目の終了地点', '最後まで諦めずに突き進みましょう！');
+        _updateUserPositionToFirestore();
+        break;
+      case Place.GoalPoint:
+        break;
+      case Place.Nothing:
+        break;
+      case null:
+        break;
+    }
   }
 
   void _showDialog(BuildContext context, String title, String content,
@@ -243,6 +248,24 @@ class MenuPageState extends State<MenuPage> {
           markerId: MarkerId(_yourLocation.toString()),
           position: LatLng(_yourLocation!.latitude as double,
               _yourLocation!.longitude as double),
+          infoWindow: InfoWindow(
+            title: title,
+            snippet: snippet,
+          ),
+          icon: BitmapDescriptor.defaultMarker,
+        ),
+      );
+      markerNum++;
+    });
+  }
+
+  // マーカーを追加する処理
+  void _addMarker1(String title, String snippet) {
+    setState(() {
+      _markers.add(
+        Marker(
+          markerId: MarkerId(_yourLocation.toString()),
+          position: LatLng(37.78648424379196, -122.40495733028315),
           infoWindow: InfoWindow(
             title: title,
             snippet: snippet,
@@ -376,3 +399,5 @@ class MenuPageState extends State<MenuPage> {
     );
   }
 }
+
+enum Place { GoalPoint, HalfwayPoint, Nothing }
