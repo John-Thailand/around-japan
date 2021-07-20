@@ -101,7 +101,7 @@ Future _showDialog(BuildContext context, String title) async {
             onPressed: () {
               Navigator.of(context).pop();
               if (title == 'ログインしました') {
-                // トップページへ戻る
+                // メニューページへ遷移
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => MenuPage()),

@@ -1,5 +1,9 @@
+import 'package:around_country/menu/menu_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../main_page.dart';
 
 class SettingPage extends StatefulWidget {
   @override
@@ -14,6 +18,9 @@ class SettingPageState extends State<SettingPage> {
 
   bool valNotify2 = false;
   bool valNotify3 = false;
+
+  // サインアウト用のFirebase_Authのインスタンス
+  final _auth = FirebaseAuth.instance;
 
   onChangeDarkMode(bool newIsDarkMode) {
     setState(() {
@@ -31,6 +38,16 @@ class SettingPageState extends State<SettingPage> {
     setState(() {
       valNotify3 = newValue3;
     });
+  }
+
+  // サインアウト
+  Future signOut() async {
+    try {
+      return await _auth.signOut();
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
   }
 
   @override
@@ -107,9 +124,20 @@ class SettingPageState extends State<SettingPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () async {
+                    await _auth.signOut().then((result) {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MainPage(),
+                        ),
+                      );
+                    });
+                  },
                   child: Text(
-                    'SIGN OUT',
+                    'サインアウト',
                     style: TextStyle(
                       fontSize: 16,
                       letterSpacing: 2.2,
