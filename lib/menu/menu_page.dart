@@ -20,7 +20,7 @@ class MenuPageState extends State<MenuPage> {
   // 現在位置の監視状況
   StreamSubscription? _locationChangedListen;
   // マーカーの設定
-  List<Marker> _markers = [];
+  Set<Marker> _markers = {};
   // Mapの表示設定
   MapType _currentMapType = MapType.normal;
 
@@ -68,7 +68,7 @@ class MenuPageState extends State<MenuPage> {
             zoom: 18),
         mapType: _currentMapType,
         // markers: _markers.map((e) => e).toSet(),
-        markers: Set.from(_markers),
+        markers: _markers,
       );
     }
   }
@@ -245,7 +245,7 @@ class MenuPageState extends State<MenuPage> {
   void _addMarker(String title, String snippet) {
     setState(() {
       Marker marker = Marker(
-        markerId: MarkerId(_yourLocation.toString()),
+        markerId: MarkerId(markerNum.toString()),
         position: LatLng(_yourLocation!.latitude as double,
             _yourLocation!.longitude as double),
         infoWindow: InfoWindow(
@@ -263,7 +263,7 @@ class MenuPageState extends State<MenuPage> {
   void _addMarker1(String title, String snippet) {
     setState(() {
       Marker marker = Marker(
-        markerId: MarkerId(_yourLocation.toString()),
+        markerId: MarkerId(markerNum.toString()),
         position: LatLng(37.78648424379196, -122.40495733028315),
         infoWindow: InfoWindow(
           title: title,
