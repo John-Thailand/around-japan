@@ -11,6 +11,8 @@ class SettingPage extends StatefulWidget {
 }
 
 class SettingPageState extends State<SettingPage> {
+  // 誕生日を設定するDate Pickerの初期値
+  DateTime date = DateTime.now();
   // ダークモードを設定するための変数
   bool isDarkMode = false;
   ThemeData _dark = ThemeData(brightness: Brightness.dark);
@@ -30,6 +32,7 @@ class SettingPageState extends State<SettingPage> {
     return userEmail;
   }
 
+  // パスワード変更
   String sendPasswordResetEmail() {
     String email = _getUserEmail();
     try {
@@ -37,6 +40,22 @@ class SettingPageState extends State<SettingPage> {
       return 'success';
     } catch (error) {
       return error.toString();
+    }
+  }
+
+  // 誕生日を設定
+  Future<Null> selectTimePicker(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: date,
+      firstDate: DateTime(1940),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null && picked != date) {
+      setState(() {
+        date = picked;
+        print(date.toString());
+      });
     }
   }
 
@@ -137,8 +156,8 @@ class SettingPageState extends State<SettingPage> {
               SizedBox(height: 10),
               buildAccountOption(context, 'パスワード変更', '確認', 'パスワード変更しますか？',
                   sendPasswordResetEmail),
-              buildAccountOption(context, 'Content Settings', '確認',
-                  'パスワード変更しますか？', sendPasswordResetEmail),
+              buildAccountOption(
+                  context, '誕生日', '確認', '誕生日を設定しますか？', selectTimePicker),
               buildAccountOption(context, 'Social', '確認', 'パスワード変更しますか？',
                   sendPasswordResetEmail),
               buildAccountOption(context, 'Language', '確認', 'パスワード変更しますか？',
@@ -244,16 +263,23 @@ class SettingPageState extends State<SettingPage> {
                 actions: [
                   FlatButton(
                     child: Text('はい'),
-                    onPressed: () {
-                      String result = function();
-                      Navigator.of(context).pop();
-                      if (result == 'success') {
-                        if (function == sendPasswordResetEmail) {
+                    onPressed: () async {
+                      String result = '';
+                      // sendPasswordResetEmailの判定
+                      if (function == sendPasswordResetEmail) {
+                        String result = function();
+                        Navigator.of(context).pop();
+                        if (result == 'success') {
                           _okDialog(context, '完了', 'パスワード変更のためにメールを送信しました。');
+                        } else {
+                          _okDialog(context, 'エラー',
+                              '内部エラーが発生しました。\nある程度の時間が経過した後に、再度実行してください。');
                         }
-                      } else {
-                        _okDialog(context, 'エラー',
-                            '内部エラーが発生しました。\nある程度の時間が経過した後に、再度実行してください。');
+                      }
+                      // selectTimePickerの判定
+                      if (function == selectTimePicker) {
+                        Navigator.of(context).pop();
+                        await function(context);
                       }
                     },
                   ),
