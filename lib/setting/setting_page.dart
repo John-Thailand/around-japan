@@ -22,6 +22,24 @@ class SettingPageState extends State<SettingPage> {
   // サインアウト用のFirebase_Authのインスタンス
   final _auth = FirebaseAuth.instance;
 
+  // ユーザーのメールアドレスを取得する
+  String _getUserEmail() {
+    String userEmail = '';
+    User? user = FirebaseAuth.instance.currentUser;
+    userEmail = user!.email!;
+    return userEmail;
+  }
+
+  String sendPasswordResetEmail() {
+    String email = _getUserEmail();
+    try {
+      _auth.sendPasswordResetEmail(email: email);
+      return 'success';
+    } catch (error) {
+      return error.toString();
+    }
+  }
+
   onChangeDarkMode(bool newIsDarkMode) {
     setState(() {
       isDarkMode = newIsDarkMode;
@@ -48,6 +66,32 @@ class SettingPageState extends State<SettingPage> {
       print(e.toString());
       return null;
     }
+  }
+
+  Future<void> _okDialog(
+    BuildContext context,
+    String title,
+    String content,
+  ) async {
+    showDialog<void>(
+      context: context,
+      // 背景を押した時に、ダイアログは閉じない設定
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -91,11 +135,16 @@ class SettingPageState extends State<SettingPage> {
               ),
               Divider(height: 20, thickness: 1),
               SizedBox(height: 10),
-              buildAccountOption(context, 'Change Password'),
-              buildAccountOption(context, 'Content Settings'),
-              buildAccountOption(context, 'Social'),
-              buildAccountOption(context, 'Language'),
-              buildAccountOption(context, 'Privacy and Security'),
+              buildAccountOption(context, 'パスワード変更', '確認', 'パスワード変更しますか？',
+                  sendPasswordResetEmail),
+              buildAccountOption(context, 'Content Settings', '確認',
+                  'パスワード変更しますか？', sendPasswordResetEmail),
+              buildAccountOption(context, 'Social', '確認', 'パスワード変更しますか？',
+                  sendPasswordResetEmail),
+              buildAccountOption(context, 'Language', '確認', 'パスワード変更しますか？',
+                  sendPasswordResetEmail),
+              buildAccountOption(context, 'Privacy and Security', '確認',
+                  'パスワード変更しますか？', sendPasswordResetEmail),
               SizedBox(height: 40),
               Row(
                 children: [
@@ -181,27 +230,38 @@ class SettingPageState extends State<SettingPage> {
     );
   }
 
-  GestureDetector buildAccountOption(BuildContext context, String title) {
+  GestureDetector buildAccountOption(BuildContext context, String uiTitle,
+      String title, String content, Function function) {
     return GestureDetector(
       onTap: () {
         showDialog(
             context: context,
+            barrierDismissible: false,
             builder: (BuildContext context) {
               return AlertDialog(
                 title: Text(title),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Option 1'),
-                    Text('Option 2'),
-                  ],
-                ),
+                content: Text(content),
                 actions: [
-                  TextButton(
+                  FlatButton(
+                    child: Text('はい'),
+                    onPressed: () {
+                      String result = function();
+                      Navigator.of(context).pop();
+                      if (result == 'success') {
+                        if (function == sendPasswordResetEmail) {
+                          _okDialog(context, '完了', 'パスワード変更のためにメールを送信しました。');
+                        }
+                      } else {
+                        _okDialog(context, 'エラー',
+                            '内部エラーが発生しました。\nある程度の時間が経過した後に、再度実行してください。');
+                      }
+                    },
+                  ),
+                  FlatButton(
+                    child: Text('いいえ'),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: Text('Close'),
                   ),
                 ],
               );
@@ -212,7 +272,7 @@ class SettingPageState extends State<SettingPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title,
+            Text(uiTitle,
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w500,

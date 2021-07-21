@@ -92,6 +92,7 @@ class LoginPage extends StatelessWidget {
 Future _showDialog(BuildContext context, String title) async {
   showDialog<void>(
     context: context,
+    barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(title),
