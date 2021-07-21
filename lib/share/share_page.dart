@@ -49,6 +49,6 @@ class SharePage extends StatelessWidget {
 }
 
 Future share() async {
-  await Share.share(
-      'Please visit http://mukku-portfolio.conohawing.com/ishii-kadan/');
+  await Share.share('Thank you for sharing Around Japan App!!!',
+      subject: 'Around Japan App');
 }
