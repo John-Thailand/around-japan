@@ -1,4 +1,3 @@
-import 'package:around_country/menu/menu_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -158,12 +157,12 @@ class SettingPageState extends State<SettingPage> {
                   sendPasswordResetEmail),
               buildAccountOption(
                   context, '誕生日', '確認', '誕生日を設定しますか？', selectTimePicker),
-              buildAccountOption(context, 'Social', '確認', 'パスワード変更しますか？',
-                  sendPasswordResetEmail),
-              buildAccountOption(context, 'Language', '確認', 'パスワード変更しますか？',
-                  sendPasswordResetEmail),
-              buildAccountOption(context, 'Privacy and Security', '確認',
-                  'パスワード変更しますか？', sendPasswordResetEmail),
+              // buildAccountOption(context, 'Social', '確認', 'パスワード変更しますか？',
+              // sendPasswordResetEmail),
+              // buildAccountOption(context, 'Language', '確認', 'パスワード変更しますか？',
+              // sendPasswordResetEmail),
+              // buildAccountOption(context, 'Privacy and Security', '確認',
+              // 'パスワード変更しますか？', sendPasswordResetEmail),
               SizedBox(height: 40),
               Row(
                 children: [
@@ -179,10 +178,10 @@ class SettingPageState extends State<SettingPage> {
               Divider(height: 20, thickness: 1),
               SizedBox(height: 10),
               buildNotificationOption('ダークモード', isDarkMode, onChangeDarkMode),
-              buildNotificationOption(
-                  'Account Active', valNotify2, onChangeFunction2),
-              buildNotificationOption(
-                  'Opportunity', valNotify3, onChangeFunction3),
+              // buildNotificationOption(
+              // 'Account Active', valNotify2, onChangeFunction2),
+              // buildNotificationOption(
+              // 'Opportunity', valNotify3, onChangeFunction3),
               SizedBox(height: 50),
               Center(
                 child: OutlinedButton(
