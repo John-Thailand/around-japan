@@ -23,6 +23,8 @@ class MenuPageState extends State<MenuPage> {
   Set<Marker> _markers = {};
   // Mapの表示設定
   MapType _currentMapType = MapType.normal;
+  // ゴール情報
+  bool isGoal = false;
 
   @override
   void initState() {
@@ -110,7 +112,6 @@ class MenuPageState extends State<MenuPage> {
     });
   }
 
-  bool isGoal = false;
   // ゴールを押した時の処理
   void _onAddGoalMarkerButtonPressed() {
     setState(() {
@@ -137,22 +138,6 @@ class MenuPageState extends State<MenuPage> {
         );
       } else {
         _showSimpleDialog();
-        // showDialog 確認・markerNum日目の終了地点として設定しますか？ゴール地点として設定しますか？
-        //                 1. markerNum日目の終了地点として設定
-        //                    title: marker日目の終了地点 content: 最後まで諦めずに突き進みましょう！
-        //                    上記の情報を持ったマーカーを追加する
-        //                    データベースに位置情報を更新する
-        //              if isGoal == false {
-        //                 2. ゴール地点として設定
-        //                    title: ゴール content: 最後までやりきったあなたは素晴らしいです！
-        //                    上記の情報を持ったマーカーを追加する
-        //                    データベースに位置情報を更新する
-        //                    isGoalをtrueに変更する
-        //              } else {
-        //                    警告・ゴールは既に設定されています。 [OK]
-        //                    スタートボタンでデータを消去した場合、isGoalを初期化（false）
-        //                 3. 設定しない
-        //                    Navigator.pop
       }
     });
   }
@@ -190,14 +175,33 @@ class MenuPageState extends State<MenuPage> {
     )) {
       case Place.HalfwayPoint:
         bool isSuccess = false;
-        await _updateUserPositionToFirestore().then((result) {
-          isSuccess = result;
-        });
-        if (isSuccess == true) {
-          _addMarker1('$day日目の終了地点', '最後まで諦めずに突き進みましょう！');
+        // ゴールしている場合
+        if (isGoal == true) {
+          // ゴール地点を既に設定していることをダイアログとして表示
+          _okDialog(context, '警告', 'ゴール地点は既に設定されています。');
+        } else {
+          await _updateUserPositionToFirestore(false).then((result) {
+            isSuccess = result;
+          });
+          if (isSuccess == true) {
+            _addMarker1('$day日目の終了地点', '最後まで諦めずに突き進みましょう！');
+          }
         }
         break;
       case Place.GoalPoint:
+        bool isSuccess = false;
+        // ゴールしている場合
+        if (isGoal == true) {
+          // ゴール地点を既に設定していることをダイアログとして表示
+          _okDialog(context, '警告', 'ゴール地点は既に設定されています。');
+        } else {
+          await _updateUserPositionToFirestore(true).then((result) {
+            isSuccess = result;
+          });
+          if (isSuccess == true) {
+            _addMarker2('ゴール', '最後までやり切ったあなたは素敵です！\nお疲れ様でした！');
+          }
+        }
         break;
       case Place.Nothing:
         break;
@@ -307,6 +311,23 @@ class MenuPageState extends State<MenuPage> {
     });
   }
 
+  // マーカーを追加する処理
+  void _addMarker2(String title, String snippet) {
+    setState(() {
+      Marker marker = Marker(
+        markerId: MarkerId(markerNum.toString()),
+        position: LatLng(37.78794159304413, -122.40443928907779),
+        infoWindow: InfoWindow(
+          title: title,
+          snippet: snippet,
+        ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      );
+      _markers.add(marker);
+      markerNum++;
+    });
+  }
+
   // マーカーを削除する処理
   void _deleteMarker() {
     setState(() {
@@ -327,11 +348,12 @@ class MenuPageState extends State<MenuPage> {
         GeoPoint(_yourLocation!.latitude as double,
             _yourLocation!.longitude as double)
       ],
+      'isGoal': false,
     });
   }
 
   // FireStoreにユーザ情報の位置情報を更新する
-  Future<bool> _updateUserPositionToFirestore() async {
+  Future<bool> _updateUserPositionToFirestore(bool isGoalButtonPressed) async {
     String email = _getUserEmail();
     final collection = FirebaseFirestore.instance.collection('userPosition');
     final snapshot = await collection.get();
@@ -346,8 +368,7 @@ class MenuPageState extends State<MenuPage> {
           // データベースに格納された位置情報
           List<GeoPoint> geoPoints = List.from(doc['geopoints']);
           // 新しく追加する位置情報
-          GeoPoint newGeoPoint = GeoPoint(_yourLocation!.latitude as double,
-              _yourLocation!.longitude as double);
+          GeoPoint newGeoPoint = GeoPoint(30.1, -15.3);
           // データベースに格納された位置情報を要素毎に取り出す
           geoPoints.forEach((geoPoint) {
             // 新しく追加する位置情報とデータベースに格納されている位置情報が同じ地点を設定している場合
@@ -357,10 +378,19 @@ class MenuPageState extends State<MenuPage> {
               isSuccess = false;
               throw ('同じ地点を設定することができません。');
             } else {
-              // そのドキュメントを更新する
+              // 位置情報を追加する
               collection.doc(doc.id).update({
                 'geopoints': FieldValue.arrayUnion([newGeoPoint]),
               });
+              // ゴールとして設定する場合
+              if (isGoalButtonPressed == true) {
+                // ゴールした情報を更新する
+                collection.doc(doc.id).update({
+                  'isGoal': true,
+                });
+                // ゴールした
+                isGoal = true;
+              }
             }
           });
         }
@@ -385,6 +415,10 @@ class MenuPageState extends State<MenuPage> {
         collection.doc(doc.id).delete();
       }
     });
+    // ゴールしている場合
+    if (isGoal == true) {
+      isGoal = false;
+    }
   }
 
   // ユーザーのメールアドレスを取得する
