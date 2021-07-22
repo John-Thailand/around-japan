@@ -305,16 +305,32 @@ class MenuPageState extends State<MenuPage> {
     final collection = FirebaseFirestore.instance.collection('userPosition');
     final snapshot = await collection.get();
     final docs = snapshot.docs;
+
     // それぞれのドキュメント
     docs.forEach((doc) {
       // アカウント設定した時のメールアドレスとドキュメント内のメールアドレスが一致している場合
       if (doc['email'] == email) {
-        // そのドキュメントを更新する
-        collection.doc(doc.id).update({
-          'geopoints': FieldValue.arrayUnion([
-            GeoPoint(_yourLocation!.latitude as double,
-                _yourLocation!.longitude as double)
-          ]),
+        // データベースに格納された位置情報
+        List<GeoPoint> geoPoints = List.from(doc['geopoints']);
+        // 新しく追加する位置情報
+        GeoPoint newGeoPoint = GeoPoint(_yourLocation!.latitude as double,
+            _yourLocation!.longitude as double);
+        // データベースに格納された位置情報を要素毎に取り出す
+        geoPoints.forEach((geoPoint) {
+          // 新しく追加する位置情報とデータベースに格納されている位置情報が同じ地点を設定している場合
+          if (geoPoint.latitude == newGeoPoint.latitude &&
+              geoPoint.longitude == newGeoPoint.longitude) {
+            // データベースに位置情報を追加することができないため、エラーを出力する
+            throw ('同じ地点を設定することができません。');
+          } else {
+            // そのドキュメントを更新する
+            collection.doc(doc.id).update({
+              'geopoints': FieldValue.arrayUnion([
+                GeoPoint(_yourLocation!.latitude as double,
+                    _yourLocation!.longitude as double)
+              ]),
+            });
+          }
         });
       }
     });
