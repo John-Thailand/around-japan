@@ -189,8 +189,13 @@ class MenuPageState extends State<MenuPage> {
       },
     )) {
       case Place.HalfwayPoint:
-        _addMarker1('$day日目の終了地点', '最後まで諦めずに突き進みましょう！');
-        _updateUserPositionToFirestore();
+        bool isSuccess = false;
+        await _updateUserPositionToFirestore().then((result) {
+          isSuccess = result;
+        });
+        if (isSuccess == true) {
+          _addMarker1('$day日目の終了地点', '最後まで諦めずに突き進みましょう！');
+        }
         break;
       case Place.GoalPoint:
         break;
@@ -216,15 +221,15 @@ class MenuPageState extends State<MenuPage> {
               child: Text('はい'),
               onPressed: () {
                 if (function == _addMarker) {
-                  // マーカーを追加する
-                  function('スタート地点', '本日の終了地点の設定をする場合は、「ゴール」ボタンを押してください。');
                   // Firestoreのデータベースにユーザーのスタート位置情報を追加する
                   dbfunction();
+                  // マーカーを追加する
+                  function('スタート地点', '本日の終了地点の設定をする場合は、「ゴール」ボタンを押してください。');
                 } else {
-                  // マーカーを削除する
-                  function();
                   // Firestoreのデータベースのユーザ位置情報を全て削除する
                   dbfunction();
+                  // マーカーを削除する
+                  function();
                 }
                 Navigator.of(context).pop(0);
               },
@@ -233,6 +238,32 @@ class MenuPageState extends State<MenuPage> {
               child: Text('いいえ'),
               onPressed: () {
                 Navigator.of(context).pop(1);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _okDialog(
+    BuildContext context,
+    String title,
+    String content,
+  ) async {
+    showDialog<void>(
+      context: context,
+      // 背景を押した時に、ダイアログは閉じない設定
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -300,40 +331,44 @@ class MenuPageState extends State<MenuPage> {
   }
 
   // FireStoreにユーザ情報の位置情報を更新する
-  Future _updateUserPositionToFirestore() async {
+  Future<bool> _updateUserPositionToFirestore() async {
     String email = _getUserEmail();
     final collection = FirebaseFirestore.instance.collection('userPosition');
     final snapshot = await collection.get();
     final docs = snapshot.docs;
+    bool isSuccess = true;
 
-    // それぞれのドキュメント
-    docs.forEach((doc) {
-      // アカウント設定した時のメールアドレスとドキュメント内のメールアドレスが一致している場合
-      if (doc['email'] == email) {
-        // データベースに格納された位置情報
-        List<GeoPoint> geoPoints = List.from(doc['geopoints']);
-        // 新しく追加する位置情報
-        GeoPoint newGeoPoint = GeoPoint(_yourLocation!.latitude as double,
-            _yourLocation!.longitude as double);
-        // データベースに格納された位置情報を要素毎に取り出す
-        geoPoints.forEach((geoPoint) {
-          // 新しく追加する位置情報とデータベースに格納されている位置情報が同じ地点を設定している場合
-          if (geoPoint.latitude == newGeoPoint.latitude &&
-              geoPoint.longitude == newGeoPoint.longitude) {
-            // データベースに位置情報を追加することができないため、エラーを出力する
-            throw ('同じ地点を設定することができません。');
-          } else {
-            // そのドキュメントを更新する
-            collection.doc(doc.id).update({
-              'geopoints': FieldValue.arrayUnion([
-                GeoPoint(_yourLocation!.latitude as double,
-                    _yourLocation!.longitude as double)
-              ]),
-            });
-          }
-        });
-      }
-    });
+    try {
+      // それぞれのドキュメント
+      docs.forEach((doc) {
+        // アカウント設定した時のメールアドレスとドキュメント内のメールアドレスが一致している場合
+        if (doc['email'] == email) {
+          // データベースに格納された位置情報
+          List<GeoPoint> geoPoints = List.from(doc['geopoints']);
+          // 新しく追加する位置情報
+          GeoPoint newGeoPoint = GeoPoint(_yourLocation!.latitude as double,
+              _yourLocation!.longitude as double);
+          // データベースに格納された位置情報を要素毎に取り出す
+          geoPoints.forEach((geoPoint) {
+            // 新しく追加する位置情報とデータベースに格納されている位置情報が同じ地点を設定している場合
+            if (geoPoint.latitude == newGeoPoint.latitude &&
+                geoPoint.longitude == newGeoPoint.longitude) {
+              // データベースに位置情報を追加することができないため、エラーを出力する
+              isSuccess = false;
+              throw ('同じ地点を設定することができません。');
+            } else {
+              // そのドキュメントを更新する
+              collection.doc(doc.id).update({
+                'geopoints': FieldValue.arrayUnion([newGeoPoint]),
+              });
+            }
+          });
+        }
+      });
+    } catch (e) {
+      _okDialog(context, 'エラー', e.toString());
+    }
+    return isSuccess;
   }
 
   // FireStoreにユーザ位置情報を削除する
