@@ -21,6 +21,8 @@ class MenuPageState extends State<MenuPage> {
   StreamSubscription? _locationChangedListen;
   // マーカーの設定
   Set<Marker> _markers = {};
+  // マーカーの数
+  int markerNum = 0;
   // Mapの表示設定
   MapType _currentMapType = MapType.normal;
   // ゴール情報
@@ -40,6 +42,9 @@ class MenuPageState extends State<MenuPage> {
         _yourLocation = result;
       });
     });
+
+    // ユーザーの位置情報（マーカー）をセット
+    _setMarker();
   }
 
   @override
@@ -87,8 +92,6 @@ class MenuPageState extends State<MenuPage> {
     });
   }
 
-  // マーカーの数
-  int markerNum = 0;
   // ダイアログのはい（1）・いいえ（0）の結果
   bool isAddStartMarker = false;
   // スタートを押した時の処理
@@ -368,7 +371,8 @@ class MenuPageState extends State<MenuPage> {
           // データベースに格納された位置情報
           List<GeoPoint> geoPoints = List.from(doc['geopoints']);
           // 新しく追加する位置情報
-          GeoPoint newGeoPoint = GeoPoint(30.1, -15.3);
+          GeoPoint newGeoPoint =
+              GeoPoint(37.78648424379196, -122.40495733028315);
           // データベースに格納された位置情報を要素毎に取り出す
           geoPoints.forEach((geoPoint) {
             // 新しく追加する位置情報とデータベースに格納されている位置情報が同じ地点を設定している場合
@@ -427,6 +431,64 @@ class MenuPageState extends State<MenuPage> {
     User? user = FirebaseAuth.instance.currentUser;
     userEmail = user!.email!;
     return userEmail;
+  }
+
+  // データベースにユーザの位置情報がある場合、マーカーをセットしていく
+  Future<void> _setMarker() async {
+    String email = _getUserEmail();
+    final collection = FirebaseFirestore.instance.collection('userPosition');
+    final snapshot = await collection.get();
+    final docs = snapshot.docs;
+    bool isSuccess = true;
+    int day = 1;
+
+    // それぞれのドキュメント
+    docs.forEach((doc) {
+      // アカウント設定した時のメールアドレスとドキュメント内のメールアドレスが一致している場合
+      if (doc['email'] == email) {
+        // データベースに格納された位置情報
+        List<GeoPoint> geoPoints = List.from(doc['geopoints']);
+        // ゴールしているか確認できる変数
+        bool isGoalFirebase = doc['isGoal'];
+        geoPoints.forEach((geoPoint) {
+          double latitude = geoPoint.latitude;
+          double longitude = geoPoint.longitude;
+          if (markerNum == 0) {
+            _setAddMarker('スタート地点', '本日の終了地点の設定をする場合は、「ゴール」ボタンを押してください。',
+                latitude, longitude);
+          } else if (markerNum == (docs.length - 1)) {
+            if (isGoalFirebase == true) {
+              _setAddMarker(
+                  'ゴール', '最後までやり切ったあなたは素敵です！\nお疲れ様でした！', latitude, longitude);
+              isGoal = true;
+            } else {
+              _setAddMarker(
+                  '$day日目の終了地点', '最後まで諦めずに突き進みましょう！', latitude, longitude);
+              day++;
+            }
+          } else {
+            _setAddMarker(
+                '$day日目の終了地点', '最後まで諦めずに突き進みましょう！', latitude, longitude);
+            day++;
+          }
+        });
+      }
+    });
+  }
+
+  // マーカーを設定していく処理
+  void _setAddMarker(String title, String snippet, latitude, longitude) {
+    Marker marker = Marker(
+      markerId: MarkerId(markerNum.toString()),
+      position: LatLng(latitude, longitude),
+      infoWindow: InfoWindow(
+        title: title,
+        snippet: snippet,
+      ),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+    );
+    _markers.add(marker);
+    markerNum++;
   }
 
   Widget button(Function function, IconData icon, String label) {
