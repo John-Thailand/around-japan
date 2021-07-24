@@ -74,8 +74,9 @@ class MenuPageState extends State<MenuPage> {
                 _yourLocation!.longitude as double),
             zoom: 18),
         mapType: _currentMapType,
-        // markers: _markers.map((e) => e).toSet(),
         markers: _markers,
+        // 現在位置にアイコン（青い円形のやつ）を置く
+        myLocationEnabled: true,
       );
     }
   }

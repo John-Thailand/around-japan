@@ -34,6 +34,15 @@ class SignUpModel extends ChangeNotifier {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: mail, password: password);
+      String userId = userCredential.user!.uid;
+      if (userCredential.user == null) {
+        return;
+      }
+      FirebaseFirestore.instance.collection('users').doc(userId).set({
+        'userId': userId,
+        'email': mail,
+        'createdAt': Timestamp.now(),
+      });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         throw ('６文字以上入力してください');
@@ -43,9 +52,5 @@ class SignUpModel extends ChangeNotifier {
     } catch (e) {
       throw (e);
     }
-    FirebaseFirestore.instance.collection('users').add({
-      'email': mail,
-      'createdAt': Timestamp.now(),
-    });
   }
 }
