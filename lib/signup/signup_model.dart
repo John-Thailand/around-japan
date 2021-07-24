@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 class SignUpModel extends ChangeNotifier {
   String mail = '';
   String password = '';
+  String userId = '';
 
   Future signUp() async {
     // 大文字と小文字が含まれているかを判定するための変数
@@ -34,7 +35,7 @@ class SignUpModel extends ChangeNotifier {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: mail, password: password);
-      String userId = userCredential.user!.uid;
+      userId = userCredential.user!.uid;
       if (userCredential.user == null) {
         return;
       }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class LoginModel extends ChangeNotifier {
   String mail = '';
   String password = '';
+  static String userId = '';
 
   Future Login() async {
     // 大文字と小文字が含まれているかを判定するための変数
@@ -31,8 +32,9 @@ class LoginModel extends ChangeNotifier {
     }
 
     try {
-      await FirebaseAuth.instance
+      UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: mail, password: password);
+      userId = userCredential.user!.uid;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         throw ('ユーザーが見つかりません');

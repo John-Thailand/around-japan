@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:around_country/login/login_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -345,61 +346,53 @@ class MenuPageState extends State<MenuPage> {
   String documentId = '';
   // FireStoreにユーザ情報を追加する
   Future _addUserPositionToFirestore() async {
-    final collection = FirebaseFirestore.instance.collection('userPosition');
-    await collection.add({
-      'email': _getUserEmail(),
+    final collection = FirebaseFirestore.instance.collection('users');
+    collection.doc(LoginModel.userId).update({
       'geopoints': [
         GeoPoint(_yourLocation!.latitude as double,
             _yourLocation!.longitude as double)
       ],
-      'isGoal': false,
     });
   }
 
   // FireStoreにユーザ情報の位置情報を更新する
   Future<bool> _updateUserPositionToFirestore(bool isGoalButtonPressed) async {
-    String email = _getUserEmail();
-    final collection = FirebaseFirestore.instance.collection('userPosition');
-    final snapshot = await collection.get();
-    final docs = snapshot.docs;
+    final collection = FirebaseFirestore.instance.collection('users');
+    DocumentSnapshot docSnapshot =
+        await collection.doc(LoginModel.userId).get();
     bool isSuccess = true;
 
     try {
-      // それぞれのドキュメント
-      docs.forEach((doc) {
-        // アカウント設定した時のメールアドレスとドキュメント内のメールアドレスが一致している場合
-        if (doc['email'] == email) {
-          // データベースに格納された位置情報
-          List<GeoPoint> geoPoints = List.from(doc['geopoints']);
-          // 新しく追加する位置情報
-          GeoPoint newGeoPoint =
-              GeoPoint(37.78648424379196, -122.40495733028315);
-          // データベースに格納された位置情報を要素毎に取り出す
-          geoPoints.forEach((geoPoint) {
-            // 新しく追加する位置情報とデータベースに格納されている位置情報が同じ地点を設定している場合
-            if (geoPoint.latitude == newGeoPoint.latitude &&
-                geoPoint.longitude == newGeoPoint.longitude) {
-              // データベースに位置情報を追加することができないため、エラーを出力する
-              isSuccess = false;
-              throw ('同じ地点を設定することができません。');
-            } else {
-              // 位置情報を追加する
-              collection.doc(doc.id).update({
-                'geopoints': FieldValue.arrayUnion([newGeoPoint]),
-              });
-              // ゴールとして設定する場合
-              if (isGoalButtonPressed == true) {
-                // ゴールした情報を更新する
-                collection.doc(doc.id).update({
-                  'isGoal': true,
-                });
-                // ゴールした
-                isGoal = true;
-              }
-            }
-          });
+      // データベースに格納された位置情報
+      List<GeoPoint> geoPoints = List.from(docSnapshot['geopoints']);
+      // 新しく追加する位置情報
+      GeoPoint newGeoPoint = GeoPoint(37.78648424379196, -122.40495733028315);
+      // データベースに格納された位置情報を要素毎に取り出す
+      geoPoints.forEach((geoPoint) {
+        // 新しく追加する位置情報とデータベースに格納されている位置情報が同じ地点を設定している場合
+        if (geoPoint.latitude == newGeoPoint.latitude &&
+            geoPoint.longitude == newGeoPoint.longitude) {
+          // データベースに位置情報を追加することができないため、エラーを出力する
+          isSuccess = false;
         }
       });
+      if (isSuccess == true) {
+        // 位置情報を追加する
+        collection.doc(LoginModel.userId).update({
+          'geopoints': FieldValue.arrayUnion([newGeoPoint]),
+        });
+        // ゴールとして設定する場合
+        if (isGoalButtonPressed == true) {
+          // ゴールした情報を更新する
+          collection.doc(LoginModel.userId).update({
+            'isGoal': true,
+          });
+          // ゴールした
+          isGoal = true;
+        }
+      } else {
+        throw ('同じ地点を設定することができません。');
+      }
     } catch (e) {
       _okDialog(context, 'エラー', e.toString());
     }
@@ -408,17 +401,12 @@ class MenuPageState extends State<MenuPage> {
 
   // FireStoreにユーザ位置情報を削除する
   Future _deleteUserPositionToFirestore() async {
-    String email = _getUserEmail();
-    final collection = FirebaseFirestore.instance.collection('userPosition');
-    final snapshot = await collection.get();
-    final docs = snapshot.docs;
-    // それぞれのドキュメント
-    docs.forEach((doc) {
-      // アカウント設定した時のメールアドレスとドキュメント内のメールアドレスが一致している場合
-      if (doc['email'] == email) {
-        // そのドキュメントを削除する
-        collection.doc(doc.id).delete();
-      }
+    final collection = FirebaseFirestore.instance.collection('users');
+    DocumentSnapshot docSnapshot =
+        await collection.doc(LoginModel.userId).get();
+    // 位置情報を空にする
+    collection.doc(LoginModel.userId).update({
+      'geopoints': {},
     });
     // ゴールしている場合
     if (isGoal == true) {
