@@ -439,15 +439,15 @@ class MenuPageState extends State<MenuPage> {
         await collection.doc(LoginModel.userId).get();
     int day = 1;
     // データベースに格納された位置情報
-    List<GeoPoint>? geoPoints = List.from(docSnapshot['geopoints']);
-    // ゴールしているか確認できる変数
-    bool? isGoal = docSnapshot['isGoal'];
+    List<GeoPoint> geoPoints;
 
-    if (geoPoints == null) {
+    if (docSnapshot['geopoints'] == null) {
       return;
+    } else {
+      geoPoints = List.from(docSnapshot['geopoints']);
     }
 
-    if (isGoal == null) {
+    if (docSnapshot['isGoal'] == null) {
       return;
     }
 
@@ -458,9 +458,10 @@ class MenuPageState extends State<MenuPage> {
         _setAddMarker('スタート地点', '本日の終了地点の設定をする場合は、「ゴール」ボタンを押してください。', latitude,
             longitude);
       } else if (markerNum == (docSnapshot['geopoints'].length - 1)) {
-        if (isGoal == true) {
+        if (docSnapshot['isGoal'] == true) {
           _setAddMarker(
               'ゴール', '最後までやり切ったあなたは素敵です！\nお疲れ様でした！', latitude, longitude);
+          isGoal = true;
         } else {
           _setAddMarker(
               '$day日目の終了地点', '最後まで諦めずに突き進みましょう！', latitude, longitude);
