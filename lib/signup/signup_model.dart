@@ -42,6 +42,8 @@ class SignUpModel extends ChangeNotifier {
       FirebaseFirestore.instance.collection('users').doc(userId).set({
         'userId': userId,
         'email': mail,
+        'isGoal': null,
+        'geopoints': null,
         'createdAt': Timestamp.now(),
       });
     } on FirebaseAuthException catch (e) {

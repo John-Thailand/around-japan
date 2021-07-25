@@ -26,7 +26,7 @@ class MenuPageState extends State<MenuPage> {
   int markerNum = 0;
   // Mapの表示設定
   MapType _currentMapType = MapType.normal;
-  // ゴール情報
+  // ゴールしているかを表す変数
   bool isGoal = false;
 
   @override
@@ -149,6 +149,9 @@ class MenuPageState extends State<MenuPage> {
 
   Future<void> _showSimpleDialog() async {
     String day = markerNum.toString();
+    final collection = FirebaseFirestore.instance.collection('users');
+    DocumentSnapshot docSnapshot =
+        await collection.doc(LoginModel.userId).get();
     switch (await showDialog(
       context: context,
       // barrierDismissible: false,
@@ -346,12 +349,14 @@ class MenuPageState extends State<MenuPage> {
   String documentId = '';
   // FireStoreにユーザ情報を追加する
   Future _addUserPositionToFirestore() async {
+    isGoal = false;
     final collection = FirebaseFirestore.instance.collection('users');
     collection.doc(LoginModel.userId).update({
       'geopoints': [
         GeoPoint(_yourLocation!.latitude as double,
             _yourLocation!.longitude as double)
       ],
+      'isGoal': false,
     });
   }
 
@@ -383,12 +388,12 @@ class MenuPageState extends State<MenuPage> {
         });
         // ゴールとして設定する場合
         if (isGoalButtonPressed == true) {
+          // ゴール変数を変更
+          isGoal = true;
           // ゴールした情報を更新する
           collection.doc(LoginModel.userId).update({
             'isGoal': true,
           });
-          // ゴールした
-          isGoal = true;
         }
       } else {
         throw ('同じ地点を設定することができません。');
@@ -410,7 +415,12 @@ class MenuPageState extends State<MenuPage> {
     });
     // ゴールしている場合
     if (isGoal == true) {
+      // ゴール変数の変更
       isGoal = false;
+      // ユーザ位置情報を削除
+      collection.doc(LoginModel.userId).update({
+        'isGoal': false,
+      });
     }
   }
 
@@ -424,43 +434,41 @@ class MenuPageState extends State<MenuPage> {
 
   // データベースにユーザの位置情報がある場合、マーカーをセットしていく
   Future<void> _setMarker() async {
-    String email = _getUserEmail();
-    final collection = FirebaseFirestore.instance.collection('userPosition');
-    final snapshot = await collection.get();
-    final docs = snapshot.docs;
-    bool isSuccess = true;
+    final collection = FirebaseFirestore.instance.collection('users');
+    DocumentSnapshot docSnapshot =
+        await collection.doc(LoginModel.userId).get();
     int day = 1;
+    // データベースに格納された位置情報
+    List<GeoPoint>? geoPoints = List.from(docSnapshot['geopoints']);
+    // ゴールしているか確認できる変数
+    bool? isGoal = docSnapshot['isGoal'];
 
-    // それぞれのドキュメント
-    docs.forEach((doc) {
-      // アカウント設定した時のメールアドレスとドキュメント内のメールアドレスが一致している場合
-      if (doc['email'] == email) {
-        // データベースに格納された位置情報
-        List<GeoPoint> geoPoints = List.from(doc['geopoints']);
-        // ゴールしているか確認できる変数
-        bool isGoalFirebase = doc['isGoal'];
-        geoPoints.forEach((geoPoint) {
-          double latitude = geoPoint.latitude;
-          double longitude = geoPoint.longitude;
-          if (markerNum == 0) {
-            _setAddMarker('スタート地点', '本日の終了地点の設定をする場合は、「ゴール」ボタンを押してください。',
-                latitude, longitude);
-          } else if (markerNum == (docs.length - 1)) {
-            if (isGoalFirebase == true) {
-              _setAddMarker(
-                  'ゴール', '最後までやり切ったあなたは素敵です！\nお疲れ様でした！', latitude, longitude);
-              isGoal = true;
-            } else {
-              _setAddMarker(
-                  '$day日目の終了地点', '最後まで諦めずに突き進みましょう！', latitude, longitude);
-              day++;
-            }
-          } else {
-            _setAddMarker(
-                '$day日目の終了地点', '最後まで諦めずに突き進みましょう！', latitude, longitude);
-            day++;
-          }
-        });
+    if (geoPoints == null) {
+      return;
+    }
+
+    if (isGoal == null) {
+      return;
+    }
+
+    geoPoints.forEach((geoPoint) {
+      double latitude = geoPoint.latitude;
+      double longitude = geoPoint.longitude;
+      if (markerNum == 0) {
+        _setAddMarker('スタート地点', '本日の終了地点の設定をする場合は、「ゴール」ボタンを押してください。', latitude,
+            longitude);
+      } else if (markerNum == (docSnapshot['geopoints'].length - 1)) {
+        if (isGoal == true) {
+          _setAddMarker(
+              'ゴール', '最後までやり切ったあなたは素敵です！\nお疲れ様でした！', latitude, longitude);
+        } else {
+          _setAddMarker(
+              '$day日目の終了地点', '最後まで諦めずに突き進みましょう！', latitude, longitude);
+          day++;
+        }
+      } else {
+        _setAddMarker('$day日目の終了地点', '最後まで諦めずに突き進みましょう！', latitude, longitude);
+        day++;
       }
     });
   }
