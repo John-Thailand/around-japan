@@ -382,17 +382,20 @@ class MenuPageState extends State<MenuPage> {
         }
       });
       if (isSuccess == true) {
-        // 位置情報を追加する
-        collection.doc(LoginModel.userId).update({
-          'geopoints': FieldValue.arrayUnion([newGeoPoint]),
-        });
         // ゴールとして設定する場合
         if (isGoalButtonPressed == true) {
           // ゴール変数を変更
           isGoal = true;
           // ゴールした情報を更新する
           collection.doc(LoginModel.userId).update({
+            'geopoints': FieldValue.arrayUnion([newGeoPoint]),
             'isGoal': true,
+          });
+        } else {
+          // 位置情報を追加する
+          collection.doc(LoginModel.userId).update({
+            'geopoints': FieldValue.arrayUnion([newGeoPoint]),
+            'isGoal': false,
           });
         }
       } else {
@@ -409,18 +412,15 @@ class MenuPageState extends State<MenuPage> {
     final collection = FirebaseFirestore.instance.collection('users');
     DocumentSnapshot docSnapshot =
         await collection.doc(LoginModel.userId).get();
-    // 位置情報を空にする
+    // ユーザ位置情報を削除
     collection.doc(LoginModel.userId).update({
       'geopoints': {},
+      'isGoal': false,
     });
     // ゴールしている場合
     if (isGoal == true) {
       // ゴール変数の変更
       isGoal = false;
-      // ユーザ位置情報を削除
-      collection.doc(LoginModel.userId).update({
-        'isGoal': false,
-      });
     }
   }
 
