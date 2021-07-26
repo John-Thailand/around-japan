@@ -192,7 +192,9 @@ class MenuPageState extends State<MenuPage> {
             isSuccess = result;
           });
           if (isSuccess == true) {
-            _addMarker1('$day日目の終了地点', '最後まで諦めずに突き進みましょう！');
+            // テスト用
+            // _addMarker1('$day日目の終了地点', '最後まで諦めずに突き進みましょう！');
+            _addMarker('$day日目の終了地点', '最後まで諦めずに突き進みましょう！');
           }
         }
         break;
@@ -207,7 +209,9 @@ class MenuPageState extends State<MenuPage> {
             isSuccess = result;
           });
           if (isSuccess == true) {
-            _addMarker2('ゴール', '最後までやり切ったあなたは素敵です！\nお疲れ様でした！');
+            // テスト用
+            // _addMarker2('ゴール', '最後までやり切ったあなたは素敵です！\nお疲れ様でした！');
+            _addMarker('ゴール', '最後までやり切ったあなたは素敵です！\nお疲れ様でした！');
           }
         }
         break;
@@ -302,39 +306,41 @@ class MenuPageState extends State<MenuPage> {
     });
   }
 
+  // テスト用
   // マーカーを追加する処理
-  void _addMarker1(String title, String snippet) {
-    setState(() {
-      Marker marker = Marker(
-        markerId: MarkerId(markerNum.toString()),
-        position: LatLng(37.78648424379196, -122.40495733028315),
-        infoWindow: InfoWindow(
-          title: title,
-          snippet: snippet,
-        ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      );
-      _markers.add(marker);
-      markerNum++;
-    });
-  }
+  // void _addMarker1(String title, String snippet) {
+  //   setState(() {
+  //     Marker marker = Marker(
+  //       markerId: MarkerId(markerNum.toString()),
+  //       position: LatLng(37.78648424379196, -122.40495733028315),
+  //       infoWindow: InfoWindow(
+  //         title: title,
+  //         snippet: snippet,
+  //       ),
+  //       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+  //     );
+  //     _markers.add(marker);
+  //     markerNum++;
+  //   });
+  // }
 
+  // テスト用
   // マーカーを追加する処理
-  void _addMarker2(String title, String snippet) {
-    setState(() {
-      Marker marker = Marker(
-        markerId: MarkerId(markerNum.toString()),
-        position: LatLng(37.78794159304413, -122.40443928907779),
-        infoWindow: InfoWindow(
-          title: title,
-          snippet: snippet,
-        ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      );
-      _markers.add(marker);
-      markerNum++;
-    });
-  }
+  // void _addMarker2(String title, String snippet) {
+  //   setState(() {
+  //     Marker marker = Marker(
+  //       markerId: MarkerId(markerNum.toString()),
+  //       position: LatLng(37.78794159304413, -122.40443928907779),
+  //       infoWindow: InfoWindow(
+  //         title: title,
+  //         snippet: snippet,
+  //       ),
+  //       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+  //     );
+  //     _markers.add(marker);
+  //     markerNum++;
+  //   });
+  // }
 
   // マーカーを削除する処理
   void _deleteMarker() {
@@ -371,7 +377,10 @@ class MenuPageState extends State<MenuPage> {
       // データベースに格納された位置情報
       List<GeoPoint> geoPoints = List.from(docSnapshot['geopoints']);
       // 新しく追加する位置情報
-      GeoPoint newGeoPoint = GeoPoint(37.78648424379196, -122.40495733028315);
+      // テスト用
+      // GeoPoint newGeoPoint = GeoPoint(37.78648424379196, -122.40495733028315);
+      GeoPoint newGeoPoint = GeoPoint(_yourLocation!.latitude as double,
+          _yourLocation!.longitude as double);
       // データベースに格納された位置情報を要素毎に取り出す
       geoPoints.forEach((geoPoint) {
         // 新しく追加する位置情報とデータベースに格納されている位置情報が同じ地点を設定している場合
