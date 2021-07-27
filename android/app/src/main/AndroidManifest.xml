@@ -1,9 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.around_country">
+    package="com.mukku.around_country">
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
    <application
         android:label="around_country"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
        <meta-data
            android:name="com.google.android.geo.API_KEY"
            android:value="AIzaSyCcpAh_GTFf4GJLJ4RSgZk9BfoCq9C7zBQ"/>

@@ -44,3 +44,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# 署名ファイル（keystore.properties）などをGit上に公開しない
+*.jks
+keystore.properties
